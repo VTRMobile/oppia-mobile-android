@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.adapter.ActivityPagerAdapter;
+import org.digitalcampus.oppia.application.MobileLearning;
 import org.digitalcampus.oppia.fragments.LoginFragment;
 import org.digitalcampus.oppia.fragments.RegisterFragment;
 import org.digitalcampus.oppia.fragments.ResetFragment;
@@ -74,9 +75,11 @@ public class WelcomeActivity extends FragmentActivity implements ActionBar.TabLi
 		actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_login)).setTabListener(this), false);
 
 		
-		Fragment fRegister = RegisterFragment.newInstance();
-		fragments.add(fRegister);
-		actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_register)).setTabListener(this), false);
+		if (MobileLearning.ALLOW_REGISTER){
+			Fragment fRegister = RegisterFragment.newInstance();
+			fragments.add(fRegister);
+			actionBar.addTab(actionBar.newTab().setText(this.getString(R.string.tab_title_register)).setTabListener(this), false);
+		}
 
 		Fragment fReset = ResetFragment.newInstance();
 		fragments.add(fReset);

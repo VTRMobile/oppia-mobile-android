@@ -83,6 +83,7 @@ public class MobileLearning extends Application {
 	public static final boolean DEFAULT_DISPLAY_COMPLETED = true;
 	public static final boolean DEFAULT_DISPLAY_PROGRESS_BAR = true;
 	
+	public static final boolean ALLOW_REGISTER = false;
 	public static final boolean MENU_ALLOW_COURSE_DOWNLOAD = true;
 	public static final boolean MENU_ALLOW_SETTINGS = true;
 	public static final boolean MENU_ALLOW_MONITOR = true;
