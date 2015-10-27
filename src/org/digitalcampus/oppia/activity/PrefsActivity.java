@@ -124,7 +124,7 @@ public class PrefsActivity extends AppActivity implements SharedPreferences.OnSh
 	}
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         prefs.registerOnSharedPreferenceChangeListener(this);
     }

@@ -18,9 +18,12 @@
 package org.digitalcampus.oppia.activity;
 
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.application.ScheduleReminders;
@@ -31,7 +34,7 @@ public class AppActivity extends FragmentActivity {
 	public static final String TAG = AppActivity.class.getSimpleName();
 	
 	private ScheduleReminders reminders;
-
+	private long lastActivity;
 	
 	/**
 	 * @param activities
@@ -55,5 +58,22 @@ public class AppActivity extends FragmentActivity {
 		}
 		return true;
 	}
+	
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+	    lastActivity = new Date().getTime();
+	    return super.dispatchTouchEvent(ev);
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+	    long now = new Date().getTime();
+	    if (now - lastActivity > 5000) {
+	    	Log.d(TAG, String.valueOf(now));
+	    	Log.d(TAG, String.valueOf(lastActivity));
+	       Log.d(TAG, "would be logging out now....");
+	    }
+	} 
 
 }

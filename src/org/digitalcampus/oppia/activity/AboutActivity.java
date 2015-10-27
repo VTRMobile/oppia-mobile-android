@@ -24,7 +24,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.MenuItem;
 
@@ -39,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class AboutActivity extends FragmentActivity implements ActionBar.TabListener {
+public class AboutActivity extends AppActivity implements ActionBar.TabListener {
 
 	public static final String TAG = AboutActivity.class.getSimpleName();
 	

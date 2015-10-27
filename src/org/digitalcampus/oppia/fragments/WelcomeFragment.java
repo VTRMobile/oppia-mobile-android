@@ -19,6 +19,7 @@ package org.digitalcampus.oppia.fragments;
 
 import org.digitalcampus.mobile.learning.R;
 import org.digitalcampus.oppia.activity.WelcomeActivity;
+import org.digitalcampus.oppia.application.MobileLearning;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -57,7 +58,7 @@ public class WelcomeFragment extends Fragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
         Button loginButton = (Button) super.getActivity().findViewById(R.id.welcome_login);
-        Button registerButton = (Button) super.getActivity().findViewById(R.id.welcome_register);
+        
 
 		loginButton.setOnClickListener(new View.OnClickListener() {
 
@@ -67,12 +68,17 @@ public class WelcomeFragment extends Fragment {
             }
         });
 		
-		registerButton.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
-                WelcomeActivity wa = (WelcomeActivity) WelcomeFragment.super.getActivity();
-                wa.switchTab(2);
-            }
-        });
+		Button registerButton = (Button) super.getActivity().findViewById(R.id.welcome_register);
+		if (MobileLearning.ALLOW_REGISTER){
+			registerButton.setOnClickListener(new View.OnClickListener() {
+	
+	            public void onClick(View v) {
+	                WelcomeActivity wa = (WelcomeActivity) WelcomeFragment.super.getActivity();
+	                wa.switchTab(2);
+	            }
+	        });
+		} else {
+			registerButton.setVisibility(View.GONE);
+		}
 	}
 }
