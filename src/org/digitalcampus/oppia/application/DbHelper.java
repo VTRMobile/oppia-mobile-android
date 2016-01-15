@@ -56,7 +56,7 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	static final String TAG = DbHelper.class.getSimpleName();
 	static final String DB_NAME = "mobilelearning.db";
-	static final int DB_VERSION = 23;
+	static final int DB_VERSION = 24;
 
 	private static SQLiteDatabase db;
 	private SharedPreferences prefs;
@@ -72,6 +72,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	private static final String COURSE_C_IMAGE = "imagelink";
 	private static final String COURSE_C_LANGS = "langs";
 	private static final String COURSE_C_ORDER_PRIORITY = "orderpriority";
+    private static final String COURSE_C_SEQUENCING = "sequencing";
 	
 	private static final String ACTIVITY_TABLE = "Activity";
 	private static final String ACTIVITY_C_ID = BaseColumns._ID;
@@ -106,8 +107,7 @@ public class DbHelper extends SQLiteOpenHelper {
 	private static final String QUIZATTEMPTS_C_MAXSCORE = "maxscore";
 	private static final String QUIZATTEMPTS_C_PASSED = "passed";
 	private static final String QUIZATTEMPTS_C_ACTIVITY_DIGEST = "actdigest";
-	
-	
+
 	private static final String SEARCH_TABLE = "search";
 	private static final String SEARCH_C_TEXT = "fulltext";
 	private static final String SEARCH_C_COURSETITLE = "coursetitle";
@@ -167,7 +167,8 @@ public class DbHelper extends SQLiteOpenHelper {
 				+ COURSE_C_IMAGE + " text,"
 				+ COURSE_C_DESC + " text,"
 				+ COURSE_C_ORDER_PRIORITY + " integer default 0, " 
-				+ COURSE_C_LANGS + " text)";
+				+ COURSE_C_LANGS + " text, "
+                + COURSE_C_SEQUENCING + " text default '" + Course.SEQUENCING_MODE_NONE + "' )";
 		db.execSQL(m_sql);
 	}
 	
@@ -395,6 +396,12 @@ public class DbHelper extends SQLiteOpenHelper {
             db.execSQL("drop table if exists " + USER_PREFS_TABLE);
             createUserPrefsTable(db);
         }
+
+        if(oldVersion <= 23 && newVersion >= 24){
+            // add field "sequencingMode" to Course table
+            String sql1 = "ALTER TABLE " + COURSE_TABLE + " ADD COLUMN " + COURSE_C_SEQUENCING + " text default '"+Course.SEQUENCING_MODE_NONE+"';";
+            db.execSQL(sql1);
+        }
 	}
 
 	public void updateV43(long userId){
@@ -423,6 +430,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		values.put(COURSE_C_IMAGE, course.getImageFile());
 		values.put(COURSE_C_DESC, course.getDescriptionJSONString());
 		values.put(COURSE_C_ORDER_PRIORITY, course.getPriority());
+        values.put(COURSE_C_SEQUENCING, course.getSequencingMode());
 		
 		if (!this.isInstalled(course.getShortname())) {
 			Log.v(TAG, "Record added");
@@ -574,6 +582,7 @@ public class DbHelper extends SQLiteOpenHelper {
 			course.setLangsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_LANGS)));
 			course.setShortname(c.getString(c.getColumnIndex(COURSE_C_SHORTNAME)));
 			course.setPriority(c.getInt(c.getColumnIndex(COURSE_C_ORDER_PRIORITY)));
+            course.setSequencingMode(c.getString(c.getColumnIndex(COURSE_C_SEQUENCING)));
 			courses.add(course);
 			c.moveToNext();
 		}
@@ -619,7 +628,8 @@ public class DbHelper extends SQLiteOpenHelper {
 			course.setShortname(c.getString(c.getColumnIndex(COURSE_C_SHORTNAME)));
 			course.setPriority(c.getInt(c.getColumnIndex(COURSE_C_ORDER_PRIORITY)));
 			course.setDescriptionsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_DESC)));
-			course = this.courseSetProgress(course, userId);
+            course.setSequencingMode(c.getString(c.getColumnIndex(COURSE_C_SEQUENCING)));
+            course = this.courseSetProgress(course, userId);
 			courses.add(course);
 			c.moveToNext();
 		}
@@ -636,13 +646,14 @@ public class DbHelper extends SQLiteOpenHelper {
 		while (c.isAfterLast() == false) {
 			course = new Course(prefs.getString(PrefsActivity.PREF_STORAGE_LOCATION, ""));
 			course.setCourseId(c.getInt(c.getColumnIndex(COURSE_C_ID)));
-			course.setVersionId(c.getDouble(c.getColumnIndex(COURSE_C_VERSIONID)));
-			course.setTitlesFromJSONString(c.getString(c.getColumnIndex(COURSE_C_TITLE)));
+            course.setVersionId(c.getDouble(c.getColumnIndex(COURSE_C_VERSIONID)));
+            course.setTitlesFromJSONString(c.getString(c.getColumnIndex(COURSE_C_TITLE)));
 			course.setImageFile(c.getString(c.getColumnIndex(COURSE_C_IMAGE)));
-			course.setLangsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_LANGS)));
-			course.setShortname(c.getString(c.getColumnIndex(COURSE_C_SHORTNAME)));
-			course.setPriority(c.getInt(c.getColumnIndex(COURSE_C_ORDER_PRIORITY)));
-			course.setDescriptionsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_DESC)));
+            course.setLangsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_LANGS)));
+            course.setShortname(c.getString(c.getColumnIndex(COURSE_C_SHORTNAME)));
+            course.setPriority(c.getInt(c.getColumnIndex(COURSE_C_ORDER_PRIORITY)));
+            course.setDescriptionsFromJSONString(c.getString(c.getColumnIndex(COURSE_C_DESC)));
+            course.setSequencingMode(c.getString(c.getColumnIndex(COURSE_C_SEQUENCING)));
 			course = this.courseSetProgress(course, userId);
 			c.moveToNext();
 		}
@@ -737,38 +748,15 @@ public class DbHelper extends SQLiteOpenHelper {
 			if (userScore > qs.getUserScore()){
 				qs.setUserScore(userScore);
 			}
+			if (c1.getInt(c1.getColumnIndex(QUIZATTEMPTS_C_PASSED)) != 0){
+				qs.setPassed(true);
+			}
 			qs.setMaxScore(c1.getFloat(c1.getColumnIndex(QUIZATTEMPTS_C_MAXSCORE)));
 			c1.moveToNext();
 		}
 		c1.close();
 		qs.setAttempted(true);
 		
-		// find if passed
-		String s2 = QUIZATTEMPTS_C_USERID + "=? AND " + QUIZATTEMPTS_C_ACTIVITY_DIGEST +"=? AND "+ QUIZATTEMPTS_C_PASSED +"=1";
-		String[] args2 = new String[] { String.valueOf(userId), digest };
-		Cursor c2 = db.query(QUIZATTEMPTS_TABLE, null, s2, args2, null, null, null);
-		if (c2.getCount() > 0){
-			qs.setPassed(true);
-		}
-		c2.close();
-		
-		/*
-		String s3 = QUIZATTEMPTS_C_USERID + "=? AND " + QUIZATTEMPTS_C_ACTIVITY_DIGEST +"=?";
-		String[] args3 = new String[] { String.valueOf(userId), digest };
-		Cursor c3 = db.query(QUIZATTEMPTS_TABLE, new String [] {"MAX("+  QUIZATTEMPTS_C_SCORE +") as userscore"}, s3, args3, null, null, null);
-		c3.moveToFirst();
-		while (c3.isAfterLast() == false) {
-			
-			int userScore = c3.getInt(c3.getColumnIndex("userscore"));
-			if (userScore > qs.getUserScore()){
-				qs.setUserScore(userScore);
-			}
-			Log.d(TAG, "Score: " + c3.getInt(c3.getColumnIndex("userscore")));
-			Log.d(TAG, "passed: " + qs.isPassed());
-			c3.moveToNext();
-		}
-		c3.close();
-		*/
 		return qs;
 	}
 	public void insertTracker(int courseId, String digest, String data, boolean completed){
