@@ -17,7 +17,7 @@
 
 package org.digitalcampus.oppia.fragments;
 
-import org.digitalcampus.mobile.learning.R;
+import com.vtrmob.admin.R;
 import org.digitalcampus.oppia.activity.WelcomeActivity;
 
 import android.os.Bundle;

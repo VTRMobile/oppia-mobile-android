@@ -19,7 +19,7 @@ package org.digitalcampus.oppia.service;
 
 import java.util.ArrayList;
 
-import org.digitalcampus.mobile.learning.R;
+import com.vtrmob.admin.R;
 import org.digitalcampus.oppia.activity.DownloadActivity;
 import org.digitalcampus.oppia.application.DbHelper;
 import org.digitalcampus.oppia.application.MobileLearning;
