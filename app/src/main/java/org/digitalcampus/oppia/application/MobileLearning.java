@@ -68,13 +68,13 @@ public class MobileLearning extends Application {
     public static final boolean ADMIN_PROTECT_COURSE_UPDATE = true;
 
 	// general other settings
-	public static final String MINT_API_KEY = "26c9c657";
+	public static final String MINT_API_KEY = "870eec71";
 	public static final int DOWNLOAD_COURSES_DISPLAY = 1; //this no of courses must be displayed for the 'download more courses' option to disappear
 	public static final int PASSWORD_MIN_LENGTH = 6;
 	public static final int PAGE_READ_TIME = 3;
 	public static final int RESOURCE_READ_TIME = 3;
 	public static final int URL_READ_TIME = 5;
-	public static final String USER_AGENT = "OppiaMobile Android: ";
+	public static final String USER_AGENT = "VTRMobile Android: ";
     public static final String DEFAULT_STORAGE_OPTION = PrefsActivity.STORAGE_OPTION_EXTERNAL;
 
     public static final int SCORECARD_ANIM_DURATION = 800;
