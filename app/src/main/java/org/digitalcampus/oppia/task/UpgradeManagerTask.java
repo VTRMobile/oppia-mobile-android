@@ -140,7 +140,15 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 			publishProgress(this.ctx.getString(R.string.info_upgrading,"v54a"));
 			payload.setResult(true);
 		}
-		
+
+		if(!prefs.getBoolean("upgradeV59",false)){
+			upgradeV59();
+			Editor editor = prefs.edit();
+			editor.putBoolean("upgradeV59", true);
+			editor.commit();
+			publishProgress(this.ctx.getString(R.string.info_upgrading,"v59"));
+			payload.setResult(true);
+		}
 		return payload;
 	}
 	
@@ -442,7 +450,16 @@ public class UpgradeManagerTask extends AsyncTask<Payload, String, Payload> {
 		db.updateUserPoints(userId, points);
 		db.updateUserBadges(userId, badges);
 	}
-	
+
+
+	/* switch to using demo.oppia-mobile.org
+	 */
+	protected void upgradeV59(){
+		Editor editor = prefs.edit();
+		editor.putString(PrefsActivity.PREF_SERVER, ctx.getString(R.string.prefServerDefault));
+		editor.commit();
+	}
+
 	@Override
 	protected void onProgressUpdate(String... obj) {
 		synchronized (this) {
